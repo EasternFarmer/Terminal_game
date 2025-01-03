@@ -173,4 +173,4 @@ cython_debug/
 
 # Game:
 saves/
-test.py
+*test.py
