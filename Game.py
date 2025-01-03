@@ -10,7 +10,9 @@ def load_json(data_path: str, default: dict) -> dict:
         with open(data_path, 'r') as file:
             return json.loads(file.read())
     except FileNotFoundError:
-        return default
+        if default is not None:
+            return default
+        return {}
 
 class Game:
     def __init__(self, save_path: str = 'saves/save.json') -> None:
