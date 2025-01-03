@@ -5,21 +5,22 @@ import json
 
 def clear() -> None: os.system('cls' if os.name == 'nt' else 'clear')
 
-def load_json(data_path: str) -> dict:
+def load_json(data_path: str, default: dict) -> dict:
     try:
         with open(data_path, 'r') as file:
             return json.loads(file.read())
     except FileNotFoundError:
-        return {
-            "1":{"save_name":None, "board":None},
-            "2":{"save_name":None, "board":None},
-            "3":{"save_name":None, "board":None},
-            "4":{"save_name":None, "board":None}
-            }
+        return default
 
 class Game:
     def __init__(self, save_path: str = 'saves/save.json') -> None:
-        self.data = load_json(save_path)
+        default: dict = {
+            "1":{"save_name":None},
+            "2":{"save_name":None},
+            "3":{"save_name":None},
+            "4":{"save_name":None}
+            }
+        self.data = load_json(save_path, default)
         self.save_path = save_path
         self.menu()
 
