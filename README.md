@@ -14,7 +14,7 @@
         - Info - Displays
 
 ## Requirements
-1. Works on Python 3.12 and up (doesn't on 3.11 and)
+1. Works on Python 3.12 and up (doesn't work on 3.11 and lower)
 
 ## How to import your custom level
 1. Make your level in import_level.txt
