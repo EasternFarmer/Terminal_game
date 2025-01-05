@@ -3,7 +3,7 @@ from time import sleep
 import json
 
 def clear() -> None: os.system('cls' if os.name == 'nt' else 'clear')
-def print_formated_board(board: list[list[str]]) -> None: print('\n'.join([''.join(lst) for lst in board]))
+def print_joined_board(board: list[list[str]]) -> None: print('\n'.join([''.join(lst) for lst in board]))
 
 def load_json(data_path: str, default: dict | None = None) -> dict:
     try:
@@ -47,7 +47,6 @@ class Game:
                     print('Invalid option!! Try again!\n')
 
     def quick_info(self) -> None:
-        pass
         print(f'{'Quick Info':=^50}')
         print("""
     [^, >, v, <] - Player "models"
@@ -65,6 +64,20 @@ class Game:
         input('\nPress Enter to continue. ')
         clear()
 
+    def load_custom_level_tutorial(self) -> None:
+        print(f'{'Load custom level Tutorial':=^50}')
+        print("""
+    1. Make your level in import_level.txt
+        - Outer edges MUST be walls "-" and "|' (and corners preferably "+" but thats not required)
+        - Player must start as "^"
+        - Level must me a rectangle (obviously)
+        - Number of box goals must be lower or equal to the number of boxes
+        - Each PAIR of teleporters must be a number (1 or 2. going to 9 will decrease readability so no)
+    2. Run import_to_json.py and name your custom_level
+    3. Enter your level name in-game. 
+""")
+        # raise NotImplementedError
+
     def save_select(self) -> None:
         clear()
         while True:
@@ -74,9 +87,10 @@ class Game:
             print(f'3. {self.save_data["3"]['save_name'] if self.save_data["3"]['save_name'] is not None else 'New Game'}')
             print(f'4. {self.save_data["4"]['save_name'] if self.save_data["4"]['save_name'] is not None else 'New Game'}')
             print(f'{'Options':=^20}')
-            print('5. Delete save')
-            print('6. Display save data. (Json)')
-            print('7. Return to main menu')
+            print('5. Load custom level.')
+            print('6. Delete save.')
+            print('7. Display save data. (Json)')
+            print('8. Return to main menu.')
             user_input = input('\nChoose an option. ')
             match user_input:
                 case '1':
@@ -96,6 +110,16 @@ class Game:
                         self.create_save(save_id='4')
                     else: self.play(save_id='4')
                 case '5':
+                    self.load_custom_level_tutorial()
+                    level_name = input('Please enter level name. (same as you put in import_to_json.py) ')
+                    try:
+                        level = load_json('assets/custom_'+level_name + '.json')
+                        if level == {}: raise FileNotFoundError
+                        self.play("0", custom_level=level)
+                    except FileNotFoundError:
+                        clear()
+                        print('File not found.')
+                case '6':
                     to_delete = input('\nChoose a save to delete. (1-4) ')
                     if to_delete in ['1','2','3','4']:
                         if input('Are you sure? (Y/N) ').lower() in ['y','yes']:    
@@ -104,7 +128,7 @@ class Game:
                     else: 
                         clear()
                         print('Invalid number!')
-                case '6':
+                case '7':
                     to_display = input('\nChoose a save to display. (1-4) ')
                     if to_display in ['1','2','3','4']:
                         clear()
@@ -112,7 +136,7 @@ class Game:
                     else: 
                         clear()
                         print('Invalid number!')
-                case '7':
+                case '8':
                     clear()
                     return
                 case _:
@@ -132,12 +156,17 @@ class Game:
         clear()
         self.play(save_id)
 
-    def play(self, save_id: str) -> None:
+    def play(self, save_id: str, *, custom_level: dict | None = None) -> None:
         clear()
         self.quick_info()
-        current_save = self.save_data[save_id]
-        current_level = self.level_data[current_save["current_level"]]["level"]
-        current_level_data = self.level_data[current_save["current_level"]]["level_data"]
+        if custom_level is None:
+            current_save = self.save_data[save_id]
+            current_level = self.level_data[current_save["current_level"]]["level"]
+            current_level_data = self.level_data[current_save["current_level"]]["level_data"]
+        else:
+            current_level = custom_level["level"]
+            current_level_data = custom_level["level_data"]
+        
         player_pos = current_level_data["player_pos"].copy()
         teleporter_pairs = current_level_data["teleporter_pairs"]
 
@@ -146,7 +175,7 @@ class Game:
         cant_move: bool = False
         
         while True:
-            print_formated_board(current_level)
+            print_joined_board(current_level)
             if cant_move:
                 print("You can't move there!")
                 cant_move = False
@@ -178,6 +207,8 @@ class Game:
                         else:
                             current_level[player_pos[0]][player_pos[1]] = '^'
                             on_special_tile = False
+                    elif current_level[player_pos[0]-1][player_pos[1]] == '#':
+                        pass
                     else: cant_move = True
                 case 'a':
                     if current_level[player_pos[0]][player_pos[1]-1] not in ['+','-','|','#']:
@@ -204,6 +235,8 @@ class Game:
                         else:
                             current_level[player_pos[0]][player_pos[1]] = '<'
                             on_special_tile = False
+                    elif current_level[player_pos[0]][player_pos[1]-1] == '#':
+                        pass
                     else: cant_move = True
                 case 's':
                     if current_level[player_pos[0]+1][player_pos[1]] not in ['+','-','|','#']:
@@ -230,6 +263,8 @@ class Game:
                         else:
                             current_level[player_pos[0]][player_pos[1]] = 'v'
                             on_special_tile = False
+                    elif current_level[player_pos[0]+1][player_pos[1]] == '#':
+                        pass
                     else: cant_move = True
                 case 'd':
                     if current_level[player_pos[0]][player_pos[1]+1] not in ['+','-','|','#']:
@@ -256,6 +291,8 @@ class Game:
                         else:
                             current_level[player_pos[0]][player_pos[1]] = '>'
                             on_special_tile = False
+                    elif current_level[player_pos[0]][player_pos[1]+1] == '#':
+                        pass
                     else: cant_move = True
                 case 'esc':
                     self.exiting()
@@ -264,14 +301,25 @@ class Game:
                 case _:
                     print('Invalid command! use `info` for avalible entries.\n')
             # level complete check
-            
-            boxes_y_goal = [coords[0] for coords in current_level_data["boxes_pos_goal"]]
-            boxes_x_goal = [coords[1] for coords in current_level_data["boxes_pos_goal"]]
-            boxes_at_goal = all(['#' == current_level[boxes_y_goal[n]][pos] for n, pos in enumerate(boxes_x_goal)])
+            if len(current_level_data["boxes_pos_goal"]) != 0:
+                boxes_y_goal = [coords[0] for coords in current_level_data["boxes_pos_goal"]]
+                boxes_x_goal = [coords[1] for coords in current_level_data["boxes_pos_goal"]]
+                boxes_at_goal = all(['#' == current_level[boxes_y_goal[n]][pos] for n, pos in enumerate(boxes_x_goal)])
+            else:
+                boxes_at_goal = True
             if boxes_at_goal and player_pos == current_level_data["player_pos_goal"]:
-                current_save["current_level"] = current_level_data["next_level"]
+                if current_level_data["next_level"] == "7146f77ac5c047a41c9728936fa4d43586c58432c9c8235ad6f95604e6c530f2":
+                    print("Congratulations on completing this custom level.")
+                    sleep(2)
+                    return
+                if current_level_data["next_level"] is not None:
+                    current_save["current_level"] = current_level_data["next_level"]
+                else: self.complete()
                 return
-        
+
+    def complete(self) -> None:
+        raise NotImplementedError
+    
     def save(self) -> None:
         with open(self.save_path, 'w') as file:
             file.write(json.dumps(self.save_data, indent=4))
