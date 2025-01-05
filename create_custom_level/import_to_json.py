@@ -1,7 +1,7 @@
 import json
 
 
-with open('import_level.txt') as f:
+with open('create_custom_level/import_level.txt') as f:
     level = []
     for line in f.read().splitlines():
         row = []
