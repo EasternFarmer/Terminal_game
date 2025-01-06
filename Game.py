@@ -1,6 +1,9 @@
 import os
+import sys
 from time import sleep
 import json
+import keyboard
+
 
 from assets._colors import *
 
@@ -82,9 +85,9 @@ class Game:
     
     Key codes / commands in game(case insensitive):
         - W A S D - Movement
-        - Esc - Exit and save
-        - Info - Displays
-        - Return / Main menu - return to the Main menu (Dosen't save progress)
+        - delete - Exit and save
+        - ? - Displays this window
+        - esc - return to the Main menu (Dosen't save progress)
 """)
         input('\nPress Enter to continue. ')
         clear()
@@ -116,6 +119,7 @@ class Game:
             print(f'6. Delete save.')
             print(f'7. Display save data. (Json)')
             print(f'8. Return to main menu.')
+            sys.stdin.flush()
             user_input = input('\nChoose an option. ')
             match user_input:
                 case '1':
@@ -210,7 +214,8 @@ class Game:
             elif invalid_command:
                 print(f'{RED}Invalid command! use `info` for avalible entries.{RESET}')
                 invalid_command = False
-            user_input = input('\nEnter your next move. ')
+            sleep(0.1)
+            user_input = keyboard.read_key()
             clear()
             match user_input.lower():
                 case 'w':
@@ -373,11 +378,11 @@ class Game:
                             player_pos = [player_pos[0],player_pos[1]+1]
                         else: cant_move = True
                     else: cant_move = True
-                case 'esc':
+                case 'delete':
                     self.exiting()
-                case 'info' | 'help':
+                case '?' | '/':
                     self.quick_info()
-                case 'main' | 'main menu' | 'return':
+                case 'esc':
                     return
                 case _:
                     invalid_command = True

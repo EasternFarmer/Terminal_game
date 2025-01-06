@@ -1,1 +1,3 @@
-python3.13 Game.py
+python --version
+python -m pip install keyboard
+python Game.py

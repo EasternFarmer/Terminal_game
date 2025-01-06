@@ -12,7 +12,7 @@ Number pairs [1-1, 2-2] - Player teleporters<br>
 Key codes / commands in game(case insensitive):<br>
     - **W A S D** - Movement<br>
     - **Esc** - Exit and save<br>
-    - **Info** - Displays<br>
+    - **Info** - Displays this window<br>
     - **Return** / **Main menu** - return to the Main menu (Dosen't save progress)
 
 ## Requirements
