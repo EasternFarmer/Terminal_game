@@ -1,7 +1,8 @@
 import json
+from os import mkdir
 
 
-with open('create_custom_level/import_level.txt') as f:
+with open('import_level.txt') as f:
     level = []
     for line in f.read().splitlines():
         row = []
@@ -11,12 +12,15 @@ with open('create_custom_level/import_level.txt') as f:
 next_level = "7146f77ac5c047a41c9728936fa4d43586c58432c9c8235ad6f95604e6c530f2"
 
 boxes_goal_pos = []
+num_boxes = 0
 player_pos: tuple
 player_pos_goal: tuple
 teleporter_pairs: dict = {}
 for i in range(len(level)):
     for j in range(len(level[0])):
         match level[i][j]:
+            case '#':
+                num_boxes += 1
             case 'X':
                 boxes_goal_pos.append((i,j))
             case '^':
@@ -30,12 +34,17 @@ for i in range(len(level)):
                 if len(teleporter_pairs[level[i][j]]) > 2:
                     raise ValueError("More than two teleporters spotted")
 
+if num_boxes < len(boxes_goal_pos):
+    raise ValueError('Not enough boxes to complete the level!')
 z = ''
 dict_string = 'z = {"level": ' + str(level) + ', "level_data": {"player_pos": ' + str(player_pos) + ', "player_pos_goal": ' + str(player_pos_goal) + ', "boxes_pos_goal": ' + str(boxes_goal_pos) + ', "teleporter_pairs": ' + str(teleporter_pairs) +', "next_level": "' + next_level + '"}}'
 exec(dict_string)
 
 user_input = input("Please select a name for your custom level. ")
 
-path = 'assets/custom_' + user_input + '.json'
-with open(path,'w') as f:
-    f.write(json.dumps(z))
+path = '../assets/custom_levels/custom_' + user_input + '.json'
+try:
+    with open(path,'w') as f:
+        f.write(json.dumps(z))
+except FileNotFoundError:
+    mkdir('../assets/custom_levels')

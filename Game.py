@@ -2,17 +2,10 @@ import os
 from time import sleep
 import json
 
+from assets._colors import *
+
 def clear() -> None: os.system('cls' if os.name == 'nt' else 'clear')
 
-#colors
-RED = '\033[91m'
-GREEN = '\033[92m'
-YELLOW = '\033[93m'
-BLUE = '\033[94m'
-CYAN = '\033[96m'
-MAGENTA = '\033[95m'
-RESET = '\033[0m'
-BOLD = '\033[1m'
 
 def print_joined_board(board: list[list[str]]) -> None:
     for line in board:
@@ -21,7 +14,7 @@ def print_joined_board(board: list[list[str]]) -> None:
                 print(f'{BOLD}{BLUE}{char}{RESET}', end='')
             elif char in ['|','-','+']:
                 print(f'{MAGENTA}{char}{RESET}', end='')
-            elif char in ['X','P']:
+            elif char in ['X','P', 'O']:
                 print(f'{GREEN}{char}{RESET}', end='')
             elif char == '#':
                 print(f'{CYAN}{char}{RESET}', end='')
@@ -82,6 +75,7 @@ class Game:
     [{BLUE}{BOLD}^{RESET}, {BLUE}{BOLD}>{RESET}, {BLUE}{BOLD}v{RESET}, {BLUE}{BOLD}<{RESET}] - Player "models"
     {CYAN}#{RESET} - Boxes
     {GREEN}X{RESET} - Box goal point
+    {GREEN}O{RESET} - Completed box goal
     {GREEN}P{RESET} - Player goal point
     [{MAGENTA}-{RESET}, {MAGENTA}|{RESET}, {MAGENTA}+{RESET}] - Walls
     Number pairs [{YELLOW}1-1{RESET}, {YELLOW}2-2{RESET}] - Player teleporters
@@ -144,7 +138,7 @@ class Game:
                     self.load_custom_level_tutorial()
                     level_name = input('Please enter level name. (same as you put in import_to_json.py) ')
                     try:
-                        level = load_json('assets/custom_'+level_name + '.json')
+                        level = load_json('assets/custom_levels/custom_'+level_name + '.json')
                         if level == {}: raise FileNotFoundError
                         self.play("0", custom_level=level)
                     except FileNotFoundError:
@@ -170,6 +164,8 @@ class Game:
                 case '8':
                     clear()
                     return
+                case 'esc':
+                    self.exiting()
                 case _:
                     clear()
                     print(f'{RED}Invalid option!! Try again!{RESET}\n')
@@ -221,7 +217,7 @@ class Game:
                     if current_level[player_pos[0]-1][player_pos[1]] not in ['+','-','|','#']:
                         current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
                         player_pos = [player_pos[0]-1,player_pos[1]]
-                        if current_level[player_pos[0]][player_pos[1]] in ['X','P']:
+                        if current_level[player_pos[0]][player_pos[1]] in ['X','P','O']:
                             on_special_tile = True
                             special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = '^'
@@ -243,13 +239,25 @@ class Game:
                             current_level[player_pos[0]][player_pos[1]] = '^'
                             on_special_tile = False
                     elif current_level[player_pos[0]-1][player_pos[1]] == '#':
-                        pass
+                        if current_level[player_pos[0]-2][player_pos[1]] == 'X':
+                            current_level[player_pos[0]-2][player_pos[1]] = 'O'
+                            current_level[player_pos[0]-1][player_pos[1]] = '^'
+                            current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
+                            on_special_tile = False
+                            player_pos = [player_pos[0]-1,player_pos[1]]
+                        elif current_level[player_pos[0]-2][player_pos[1]] == '.':
+                            current_level[player_pos[0]-2][player_pos[1]] = '#'
+                            current_level[player_pos[0]-1][player_pos[1]] = '^'
+                            current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
+                            on_special_tile = False
+                            player_pos = [player_pos[0]-1,player_pos[1]]
+                        else: cant_move = True
                     else: cant_move = True
                 case 'a':
                     if current_level[player_pos[0]][player_pos[1]-1] not in ['+','-','|','#']:
                         current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
                         player_pos = [player_pos[0],player_pos[1]-1]
-                        if current_level[player_pos[0]][player_pos[1]] in ['X','P']:
+                        if current_level[player_pos[0]][player_pos[1]] in ['X','P','O']:
                             on_special_tile = True
                             special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = '<'
@@ -271,13 +279,25 @@ class Game:
                             current_level[player_pos[0]][player_pos[1]] = '<'
                             on_special_tile = False
                     elif current_level[player_pos[0]][player_pos[1]-1] == '#':
-                        pass
+                        if current_level[player_pos[0]][player_pos[1]-2] == 'X':
+                            current_level[player_pos[0]][player_pos[1]-2] = 'O'
+                            current_level[player_pos[0]][player_pos[1]-1] = '<'
+                            current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
+                            on_special_tile = False
+                            player_pos = [player_pos[0],player_pos[1]-1]
+                        elif current_level[player_pos[0]][player_pos[1]-2] == '.':
+                            current_level[player_pos[0]][player_pos[1]-2] = '#'
+                            current_level[player_pos[0]][player_pos[1]-1] = '<'
+                            current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
+                            on_special_tile = False
+                            player_pos = [player_pos[0],player_pos[1]-1]
+                        else: cant_move = True
                     else: cant_move = True
                 case 's':
                     if current_level[player_pos[0]+1][player_pos[1]] not in ['+','-','|','#']:
                         current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
                         player_pos = [player_pos[0]+1,player_pos[1]]
-                        if current_level[player_pos[0]][player_pos[1]] in ['X','P']:
+                        if current_level[player_pos[0]][player_pos[1]] in ['X','P','O']:
                             on_special_tile = True
                             special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = 'v'
@@ -299,13 +319,25 @@ class Game:
                             current_level[player_pos[0]][player_pos[1]] = 'v'
                             on_special_tile = False
                     elif current_level[player_pos[0]+1][player_pos[1]] == '#':
-                        pass
+                        if current_level[player_pos[0]+2][player_pos[1]] == 'X':
+                            current_level[player_pos[0]+2][player_pos[1]] = 'O'
+                            current_level[player_pos[0]+1][player_pos[1]] = 'v'
+                            current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
+                            on_special_tile = False
+                            player_pos = [player_pos[0]+1,player_pos[1]]
+                        elif current_level[player_pos[0]+2][player_pos[1]] == '.':
+                            current_level[player_pos[0]+2][player_pos[1]] = '#'
+                            current_level[player_pos[0]+1][player_pos[1]] = 'v'
+                            current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
+                            on_special_tile = False
+                            player_pos = [player_pos[0]+1,player_pos[1]]
+                        else: cant_move = True
                     else: cant_move = True
                 case 'd':
                     if current_level[player_pos[0]][player_pos[1]+1] not in ['+','-','|','#']:
                         current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
                         player_pos = [player_pos[0],player_pos[1]+1]
-                        if current_level[player_pos[0]][player_pos[1]] in ['X','P']:
+                        if current_level[player_pos[0]][player_pos[1]] in ['X','P','O']:
                             on_special_tile = True
                             special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = '>'
@@ -327,7 +359,19 @@ class Game:
                             current_level[player_pos[0]][player_pos[1]] = '>'
                             on_special_tile = False
                     elif current_level[player_pos[0]][player_pos[1]+1] == '#':
-                        pass
+                        if current_level[player_pos[0]][player_pos[1]+2] == 'X':
+                            current_level[player_pos[0]][player_pos[1]+2] = 'O'
+                            current_level[player_pos[0]][player_pos[1]+1] = '>'
+                            current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
+                            on_special_tile = False
+                            player_pos = [player_pos[0],player_pos[1]+1]
+                        elif current_level[player_pos[0]][player_pos[1]+2] == '.':
+                            current_level[player_pos[0]][player_pos[1]+2] = '#'
+                            current_level[player_pos[0]][player_pos[1]+1] = '>'
+                            current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
+                            on_special_tile = False
+                            player_pos = [player_pos[0],player_pos[1]+1]
+                        else: cant_move = True
                     else: cant_move = True
                 case 'esc':
                     self.exiting()
@@ -341,7 +385,7 @@ class Game:
             if len(current_level_data["boxes_pos_goal"]) != 0:
                 boxes_y_goal = [coords[0] for coords in current_level_data["boxes_pos_goal"]]
                 boxes_x_goal = [coords[1] for coords in current_level_data["boxes_pos_goal"]]
-                boxes_at_goal = all(['#' == current_level[boxes_y_goal[n]][pos] for n, pos in enumerate(boxes_x_goal)])
+                boxes_at_goal = all(['O' == current_level[boxes_y_goal[n]][pos] for n, pos in enumerate(boxes_x_goal)])
             else:
                 boxes_at_goal = True
             if boxes_at_goal and player_pos == current_level_data["player_pos_goal"]:
@@ -358,8 +402,12 @@ class Game:
         raise NotImplementedError
     
     def save(self) -> None:
-        with open(self.save_path, 'w') as file:
-            file.write(json.dumps(self.save_data, indent=4))
+        try:
+            with open(self.save_path, 'w') as file:
+                file.write(json.dumps(self.save_data, indent=4))
+        except FileNotFoundError:
+            os.mkdir('saves')
+            self.save()
     
     def exiting(self, *, save: bool = True) -> None:
         for i in range(3):
