@@ -9,7 +9,7 @@ O - Completed box goal<br>
 [-, |, +] - Walls<br>
 Number pairs [1-1, 2-2] - Player teleporters<br>
 
-Key codes / commands in game(case insensitive):<br>
+Key binds in game:<br>
     - **W A S D** - Movement<br>
     - **delete** - Exit and save<br>
     - **?** - Displays this window<br>
