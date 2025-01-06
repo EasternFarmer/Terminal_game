@@ -9,11 +9,11 @@ O - Completed box goal<br>
 [-, |, +] - Walls<br>
 Number pairs [1-1, 2-2] - Player teleporters<br>
 
-Key codes / commands in game(case insensitive):
-    - **W A S D** - Movement
-    - **delete** - Exit and save
-    - **?** - Displays this window
-    - **esc** - return to the Main menu (Dosen't save progress)
+Key codes / commands in game(case insensitive):<br>
+    - **W A S D** - Movement<br>
+    - **delete** - Exit and save<br>
+    - **?** - Displays this window<br>
+    - **esc** - return to the Main menu (Dosen't save progress)<br>
 
 ## Requirements
 1. Works on Python 3.12 and up (doesn't work on 3.11 and lower)
