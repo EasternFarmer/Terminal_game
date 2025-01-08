@@ -1,5 +1,7 @@
 # Welcome to my Terminal_game
 
+## For key listener/ not having to press enter after every move check [keyboard-module](https://github.com/EasternFarmer/Terminal_game/tree/keyboard-module) branch
+
 ## Basic information on the game
 [^, >, v, <] - Player "models"<br>
 \# - Boxes<br>
