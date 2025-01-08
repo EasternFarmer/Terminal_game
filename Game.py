@@ -1,10 +1,10 @@
-import os
+from os import system, name as os_name, mkdir
 from time import sleep
 import json
 
 from assets._colors import *
 
-def clear() -> None: os.system('cls' if os.name == 'nt' else 'clear')
+def clear() -> None: system('cls' if os_name == 'nt' else 'clear')
 
 
 def print_joined_board(board: list[list[str]]) -> None:
@@ -406,7 +406,7 @@ class Game:
             with open(self.save_path, 'w') as file:
                 file.write(json.dumps(self.save_data, indent=4))
         except FileNotFoundError:
-            os.mkdir('saves')
+            mkdir('saves')
             self.save()
     
     def exiting(self, *, save: bool = True) -> None:
