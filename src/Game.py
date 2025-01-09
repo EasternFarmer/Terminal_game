@@ -1,11 +1,10 @@
 from os import system, name as os_name, mkdir
-import sys
 from time import sleep
 import json
+from typing import Optional
+
 import keyboard
-
-from assets._colors import *
-
+import _colors
 
 def clear() -> None: system('cls' if os_name == 'nt' else 'clear')
 
@@ -14,17 +13,17 @@ def print_joined_board(board: list[list[str]]) -> None:
     for line in board:
         for char in line:
             if char in ['^', '>', '<', 'v']:
-                print(f'{BOLD}{BLUE}{char}{RESET}', end='')
+                print(f'{_colors.BOLD}{_colors.BLUE}{char}{_colors.RESET}', end='')
             elif char in ['|', '-', '+']:
-                print(f'{MAGENTA}{char}{RESET}', end='')
+                print(f'{_colors.MAGENTA}{char}{_colors.RESET}', end='')
             elif char in ['X', 'P', 'O']:
-                print(f'{GREEN}{char}{RESET}', end='')
+                print(f'{_colors.GREEN}{char}{_colors.RESET}', end='')
             elif char == '#':
-                print(f'{CYAN}{char}{RESET}', end='')
+                print(f'{_colors.CYAN}{char}{_colors.RESET}', end='')
             elif char in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
-                print(f'{YELLOW}{char}{RESET}', end='')
+                print(f'{_colors.YELLOW}{char}{_colors.RESET}', end='')
             elif char == '.':
-                print(f'{'\033[90m'}{char}{RESET}', end='')
+                print(f'{'\033[90m'}{char}{_colors.RESET}', end='')
             else:
                 print(char, end='')
         print('')
@@ -50,10 +49,9 @@ class Game:
             "3": {"save_name": None},
             "4": {"save_name": None}
         }
-        self.level_data = load_json('assets/levels.json')
+        self.level_data = load_json('src/assets/levels.json')
         self.save_data = load_json(save_path, default_save_data)
         self.save_path = save_path
-        self.main_loop()
 
     def main_loop(self) -> None:
         clear()
@@ -72,19 +70,19 @@ class Game:
                     self.exiting()
                 case _:
                     clear()
-                    print(f'{RED}Invalid option!! Try again!{RESET}\n')
+                    print(f'{_colors.RED}Invalid option!! Try again!{_colors.RESET}\n')
 
     @staticmethod
     def quick_info() -> None:
         print(f'{'Quick Info':=^50}')
         print(f"""
-    [{BLUE}{BOLD}^{RESET}, {BLUE}{BOLD}>{RESET}, {BLUE}{BOLD}v{RESET}, {BLUE}{BOLD}<{RESET}] - Player "models"
-    {CYAN}#{RESET} - Boxes
-    {GREEN}X{RESET} - Box goal point
-    {GREEN}O{RESET} - Completed box goal
-    {GREEN}P{RESET} - Player goal point
-    [{MAGENTA}-{RESET}, {MAGENTA}|{RESET}, {MAGENTA}+{RESET}] - Walls
-    Number pairs [{YELLOW}1-1{RESET}, {YELLOW}2-2{RESET}] - Player teleporters
+    [{_colors.BLUE}{_colors.BOLD}^{_colors.RESET}, {_colors.BLUE}{_colors.BOLD}>{_colors.RESET}, {_colors.BLUE}{_colors.BOLD}v{_colors.RESET}, {_colors.BLUE}{_colors.BOLD}<{_colors.RESET}] - Player "models"
+    {_colors.CYAN}#{_colors.RESET} - Boxes
+    {_colors.GREEN}X{_colors.RESET} - Box goal point
+    {_colors.GREEN}O{_colors.RESET} - Completed box goal
+    {_colors.GREEN}P{_colors.RESET} - Player goal point
+    [{_colors.MAGENTA}-{_colors.RESET}, {_colors.MAGENTA}|{_colors.RESET}, {_colors.MAGENTA}+{_colors.RESET}] - Walls
+    Number pairs [{_colors.YELLOW}1-1{_colors.RESET} up to {_colors.YELLOW}9-9{_colors.RESET}] - Player teleporters
     
     Key codes / commands in game(case insensitive):
         - W A S D - Movement
@@ -127,7 +125,6 @@ class Game:
             print(f'6. Delete save.')
             print(f'7. Display save data. (Json)')
             print(f'8. Return to main menu.')
-            sys.stdin.flush()
             user_input = input('\nChoose an option. ')
             match user_input:
                 case '1':
@@ -154,12 +151,12 @@ class Game:
                     self.load_custom_level_tutorial()
                     level_name = input('Please enter level name. (same as you put in import_to_json.py) ')
                     try:
-                        level = load_json('assets/custom_levels/custom_' + level_name + '.json')
+                        level = load_json('src/assets/custom_levels/custom_' + level_name + '.json')
                         if level == {}: raise FileNotFoundError
                         self.play("0", custom_level=level)
                     except FileNotFoundError:
                         clear()
-                        print(f'{RED}File not found.{RESET}')
+                        print(f'{_colors.RED}File not found.{_colors.RESET}')
                 case '6':
                     to_delete = input('\nChoose a save to delete. (1-4) ')
                     if to_delete in ['1', '2', '3', '4']:
@@ -168,7 +165,7 @@ class Game:
                             clear()
                     else:
                         clear()
-                        print(f'{RED}Invalid number!{RESET}')
+                        print(f'{_colors.RED}Invalid number!{_colors.RESET}')
                 case '7':
                     to_display = input('\nChoose a save to display. (1-4) ')
                     if to_display in ['1', '2', '3', '4']:
@@ -176,7 +173,7 @@ class Game:
                         print(json.dumps(self.save_data[to_display], indent=4), end='\n\n')
                     else:
                         clear()
-                        print(f'{RED}Invalid number!{RESET}')
+                        print(f'{_colors.RED}Invalid number!{_colors.RESET}')
                 case '8':
                     clear()
                     return
@@ -184,7 +181,7 @@ class Game:
                     self.exiting()
                 case _:
                     clear()
-                    print(f'{RED}Invalid option!! Try again!{RESET}\n')
+                    print(f'{_colors.RED}Invalid option!! Try again!{_colors.RESET}\n')
 
     def create_save(self, save_id: str) -> None:
         current_save = self.save_data[save_id]
@@ -199,7 +196,7 @@ class Game:
         clear()
         self.play(save_id)
 
-    def play(self, save_id: str, *, custom_level: dict | None = None) -> None:
+    def play(self, save_id: str, *, custom_level: Optional[dict] = None) -> None:
         clear()
         self.quick_info()
         if custom_level is None:
@@ -221,15 +218,15 @@ class Game:
         while True:
             print_joined_board(current_level)
             if cant_move:
-                print(f"{RED}You can't move there!{RESET}")
+                print(f"{_colors.RED}You can't move there!{_colors.RESET}")
                 cant_move = False
             elif invalid_command:
-                print(f'{RED}Invalid command! use `info` for available entries.{RESET}')
+                print(f'{_colors.RED}Invalid command! use `info` for available entries.{_colors.RESET}')
                 invalid_command = False
             sleep(0.1)
             user_input = keyboard.read_key()
             clear()
-            match user_input.lower():
+            match user_input:
                 case 'w':
                     if current_level[player_pos[0] - 1][player_pos[1]] not in ['+', '-', '|', '#']:
                         current_level[player_pos[0]][player_pos[1]] = '.' if not on_special_tile else special_tile
@@ -238,19 +235,12 @@ class Game:
                             on_special_tile = True
                             special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = '^'
-                        elif current_level[player_pos[0]][player_pos[1]] == '1':
-                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs['1']]
+                        elif current_level[player_pos[0]][player_pos[1]] in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
+                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs[current_level[player_pos[0]][player_pos[1]]]]
                             temp_teleporter_pairs.remove(player_pos)
                             player_pos = temp_teleporter_pairs[0]
                             on_special_tile = True
-                            special_tile = '1'
-                            current_level[player_pos[0]][player_pos[1]] = '^'
-                        elif current_level[player_pos[0]][player_pos[1]] == '2':
-                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs['2']]
-                            temp_teleporter_pairs.remove(player_pos)
-                            player_pos = temp_teleporter_pairs[0]
-                            on_special_tile = True
-                            special_tile = '2'
+                            special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = '^'
                         else:
                             current_level[player_pos[0]][player_pos[1]] = '^'
@@ -280,19 +270,12 @@ class Game:
                             on_special_tile = True
                             special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = '<'
-                        elif current_level[player_pos[0]][player_pos[1]] == '1':
-                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs['1']]
+                        elif current_level[player_pos[0]][player_pos[1]] in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
+                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs[current_level[player_pos[0]][player_pos[1]]]]
                             temp_teleporter_pairs.remove(player_pos)
                             player_pos = temp_teleporter_pairs[0]
                             on_special_tile = True
-                            special_tile = '1'
-                            current_level[player_pos[0]][player_pos[1]] = '<'
-                        elif current_level[player_pos[0]][player_pos[1]] == '2':
-                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs['2']]
-                            temp_teleporter_pairs.remove(player_pos)
-                            player_pos = temp_teleporter_pairs[0]
-                            on_special_tile = True
-                            special_tile = '2'
+                            special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = '<'
                         else:
                             current_level[player_pos[0]][player_pos[1]] = '<'
@@ -322,19 +305,12 @@ class Game:
                             on_special_tile = True
                             special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = 'v'
-                        elif current_level[player_pos[0]][player_pos[1]] == '1':
-                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs['1']]
+                        elif current_level[player_pos[0]][player_pos[1]] in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
+                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs[current_level[player_pos[0]][player_pos[1]]]]
                             temp_teleporter_pairs.remove(player_pos)
                             player_pos = temp_teleporter_pairs[0]
                             on_special_tile = True
-                            special_tile = '1'
-                            current_level[player_pos[0]][player_pos[1]] = 'v'
-                        elif current_level[player_pos[0]][player_pos[1]] == '2':
-                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs['2']]
-                            temp_teleporter_pairs.remove(player_pos)
-                            player_pos = temp_teleporter_pairs[0]
-                            on_special_tile = True
-                            special_tile = '2'
+                            special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = 'v'
                         else:
                             current_level[player_pos[0]][player_pos[1]] = 'v'
@@ -364,19 +340,12 @@ class Game:
                             on_special_tile = True
                             special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = '>'
-                        elif current_level[player_pos[0]][player_pos[1]] == '1':
-                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs['1']]
+                        elif current_level[player_pos[0]][player_pos[1]] in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
+                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs[current_level[player_pos[0]][player_pos[1]]]]
                             temp_teleporter_pairs.remove(player_pos)
                             player_pos = temp_teleporter_pairs[0]
                             on_special_tile = True
-                            special_tile = '1'
-                            current_level[player_pos[0]][player_pos[1]] = '>'
-                        elif current_level[player_pos[0]][player_pos[1]] == '2':
-                            temp_teleporter_pairs = [coords.copy() for coords in teleporter_pairs['2']]
-                            temp_teleporter_pairs.remove(player_pos)
-                            player_pos = temp_teleporter_pairs[0]
-                            on_special_tile = True
-                            special_tile = '2'
+                            special_tile = current_level[player_pos[0]][player_pos[1]]
                             current_level[player_pos[0]][player_pos[1]] = '>'
                         else:
                             current_level[player_pos[0]][player_pos[1]] = '>'
@@ -446,5 +415,6 @@ class Game:
             self.save()
         exit()
 
-
-Game()
+if __name__ == '__main__':
+    a = Game()
+    a.main_loop()
