@@ -1,3 +1,4 @@
 # Ideas to add
-- Key listener
+- ~~Key listener~~
 - ~~The mf box pushing mechanic~~
+- ~~More teleporters~~

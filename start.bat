@@ -1,1 +1,1 @@
-python3.13 Game.py
+python src/main.py
