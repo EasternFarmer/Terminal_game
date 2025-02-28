@@ -1,10 +1,13 @@
-from os import system, name as os_name, mkdir
+from os import system, name as os_name, makedirs
 from time import sleep
 import json
 from typing import Optional
 
 import keyboard
-import _colors
+from _colors import Colored as c
+
+if __name__ == '__main__':
+    raise RuntimeError
 
 def clear() -> None: system('cls' if os_name == 'nt' else 'clear')
 
@@ -13,17 +16,17 @@ def print_joined_board(board: list[list[str]]) -> None:
     for line in board:
         for char in line:
             if char in ['^', '>', '<', 'v']:
-                print(f'{_colors.BOLD}{_colors.BLUE}{char}{_colors.RESET}', end='')
+                print(f'{c.BOLD}{c.BLUE}{char}{c.RESET}', end='')
             elif char in ['|', '-', '+']:
-                print(f'{_colors.MAGENTA}{char}{_colors.RESET}', end='')
+                print(f'{c.MAGENTA}{char}{c.RESET}', end='')
             elif char in ['X', 'P', 'O']:
-                print(f'{_colors.GREEN}{char}{_colors.RESET}', end='')
+                print(f'{c.GREEN}{char}{c.RESET}', end='')
             elif char == '#':
-                print(f'{_colors.CYAN}{char}{_colors.RESET}', end='')
+                print(f'{c.CYAN}{char}{c.RESET}', end='')
             elif char in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
-                print(f'{_colors.YELLOW}{char}{_colors.RESET}', end='')
+                print(f'{c.YELLOW}{char}{c.RESET}', end='')
             elif char == '.':
-                print(f'{'\033[90m'}{char}{_colors.RESET}', end='')
+                print(f'{'\033[90m'}{char}{c.RESET}', end='')
             else:
                 print(char, end='')
         print('')
@@ -40,6 +43,13 @@ def load_json(data_path: str, default: dict | None = None) -> dict:
             return default
         return {}
 
+def save_json(save_path: str, save_data: dict | list) -> None:
+    try:
+        with open(save_path, 'w') as file:
+            file.write(json.dumps(save_data, indent=4))
+    except FileNotFoundError:
+        makedirs('/'.join(save_path.replace('\\', '/').split('/')[:-1]).removeprefix('C:/'))
+        save_json(save_path, save_data)
 
 class Game:
     def __init__(self, save_path: str = 'saves/save.json') -> None:
@@ -50,6 +60,7 @@ class Game:
             "4": {"save_name": None}
         }
         self.level_data = load_json('src/assets/levels.json')
+        assert self.level_data != {}
         self.save_data = load_json(save_path, default_save_data)
         self.save_path = save_path
 
@@ -70,25 +81,25 @@ class Game:
                     self.exiting()
                 case _:
                     clear()
-                    print(f'{_colors.RED}Invalid option!! Try again!{_colors.RESET}\n')
+                    print(f'{c.RED}Invalid option!! Try again!{c.RESET}\n')
 
     @staticmethod
     def quick_info() -> None:
         print(f'{'Quick Info':=^50}')
         print(f"""
-    [{_colors.BLUE}{_colors.BOLD}^{_colors.RESET}, {_colors.BLUE}{_colors.BOLD}>{_colors.RESET}, {_colors.BLUE}{_colors.BOLD}v{_colors.RESET}, {_colors.BLUE}{_colors.BOLD}<{_colors.RESET}] - Player "models"
-    {_colors.CYAN}#{_colors.RESET} - Boxes
-    {_colors.GREEN}X{_colors.RESET} - Box goal point
-    {_colors.GREEN}O{_colors.RESET} - Completed box goal
-    {_colors.GREEN}P{_colors.RESET} - Player goal point
-    [{_colors.MAGENTA}-{_colors.RESET}, {_colors.MAGENTA}|{_colors.RESET}, {_colors.MAGENTA}+{_colors.RESET}] - Walls
-    Number pairs [{_colors.YELLOW}1-1{_colors.RESET} up to {_colors.YELLOW}9-9{_colors.RESET}] - Player teleporters
+    [{c.BLUE}{c.BOLD}^{c.RESET}, {c.BLUE}{c.BOLD}>{c.RESET}, {c.BLUE}{c.BOLD}v{c.RESET}, {c.BLUE}{c.BOLD}<{c.RESET}] - Player "models"
+    {c.CYAN}#{c.RESET} - Boxes
+    {c.GREEN}X{c.RESET} - Box goal point
+    {c.GREEN}O{c.RESET} - Completed box goal
+    {c.GREEN}P{c.RESET} - Player goal point
+    [{c.MAGENTA}-{c.RESET}, {c.MAGENTA}|{c.RESET}, {c.MAGENTA}+{c.RESET}] - Walls
+    Number pairs [{c.YELLOW}1-1{c.RESET} up to {c.YELLOW}9-9{c.RESET}] - Player teleporters
     
-    Key codes / commands in game(case insensitive):
-        - W A S D - Movement
-        - delete - Exit and save
-        - ? - Displays this window
-        - esc - return to the Main menu (Doesn't save progress)
+    Key binds in game:
+        - **W A S D** - Movement
+        - **delete** - Exit and save
+        - **?** - Displays this window
+        - **esc** - return to the Main menu (Doesn't save progress)
 """)
         input('\nPress Enter to continue. ')
         clear()
@@ -98,15 +109,16 @@ class Game:
         print(f'{'Load custom level Tutorial':=^50}')
         print("""
     1. Make your level in import_level.txt
-        - Outer edges MUST be walls "-" and "|' (and corners preferably "+" but that's not required)
-        - Player must start as "^"
-        - Level must me a rectangle (obviously)
+        - Outer edges MUST be walls **"-"** and **"|'** (and corners preferably **"+"** but that's not required)
+        - Level must be a rectangle (obviously)
         - Number of box goals must be lower or equal to the number of boxes
-        - Each PAIR of teleporters must be a number (1 or 2. going to 9 will decrease readability so no)
-    2. Run import_to_json.py and name your custom_level
+        - Each PAIR of teleporters must be a number (1 to 9)
+    2. Run import_to_json.py (either by convert_to_json_start.bat or normal python) and name your custom_level
     3. Enter your level name in-game. 
+        - Start > Load custom level > Enter level name
 """)
-        # raise NotImplementedError
+        input('\nPress Enter to continue. ')
+        clear()
 
     def save_select(self) -> None:
         clear()
@@ -156,7 +168,7 @@ class Game:
                         self.play("0", custom_level=level)
                     except FileNotFoundError:
                         clear()
-                        print(f'{_colors.RED}File not found.{_colors.RESET}')
+                        print(f'{c.RED}File not found.{c.RESET}')
                 case '6':
                     to_delete = input('\nChoose a save to delete. (1-4) ')
                     if to_delete in ['1', '2', '3', '4']:
@@ -165,7 +177,7 @@ class Game:
                             clear()
                     else:
                         clear()
-                        print(f'{_colors.RED}Invalid number!{_colors.RESET}')
+                        print(f'{c.RED}Invalid number!{c.RESET}')
                 case '7':
                     to_display = input('\nChoose a save to display. (1-4) ')
                     if to_display in ['1', '2', '3', '4']:
@@ -173,7 +185,7 @@ class Game:
                         print(json.dumps(self.save_data[to_display], indent=4), end='\n\n')
                     else:
                         clear()
-                        print(f'{_colors.RED}Invalid number!{_colors.RESET}')
+                        print(f'{c.RED}Invalid number!{c.RESET}')
                 case '8':
                     clear()
                     return
@@ -181,7 +193,7 @@ class Game:
                     self.exiting()
                 case _:
                     clear()
-                    print(f'{_colors.RED}Invalid option!! Try again!{_colors.RESET}\n')
+                    print(f'{c.RED}Invalid option!! Try again!{c.RESET}\n')
 
     def create_save(self, save_id: str) -> None:
         current_save = self.save_data[save_id]
@@ -218,10 +230,10 @@ class Game:
         while True:
             print_joined_board(current_level)
             if cant_move:
-                print(f"{_colors.RED}You can't move there!{_colors.RESET}")
+                print(f"{c.RED}You can't move there!{c.RESET}")
                 cant_move = False
             elif invalid_command:
-                print(f'{_colors.RED}Invalid command! use `info` for available entries.{_colors.RESET}')
+                print(f'{c.RED}Invalid command! use `info` for available entries.{c.RESET}')
                 invalid_command = False
             sleep(0.1)
             user_input = keyboard.read_key()
@@ -377,14 +389,11 @@ class Game:
                     invalid_command = True
             # level complete check
             if len(current_level_data["boxes_pos_goal"]) != 0:
-                boxes_y_goal = [coords[0] for coords in current_level_data["boxes_pos_goal"]]
-                boxes_x_goal = [coords[1] for coords in current_level_data["boxes_pos_goal"]]
-                boxes_at_goal = all(['O' == current_level[boxes_y_goal[n]][pos] for n, pos in enumerate(boxes_x_goal)])
+                boxes_at_goal = all(['O' == current_level[goals[0]][goals[1]] for goals in current_level_data["boxes_pos_goal"]])
             else:
                 boxes_at_goal = True
             if boxes_at_goal and player_pos == current_level_data["player_pos_goal"]:
-                if current_level_data[
-                    "next_level"] == "7146f77ac5c047a41c9728936fa4d43586c58432c9c8235ad6f95604e6c530f2":
+                if current_level_data["next_level"] == "7146f77ac5c047a41c9728936fa4d43586c58432c9c8235ad6f95604e6c530f2":
                     print("Congratulations on completing this custom level.")
                     sleep(2)
                     return
@@ -397,14 +406,6 @@ class Game:
     def complete(self) -> None:
         raise NotImplementedError
 
-    def save(self) -> None:
-        try:
-            with open(self.save_path, 'w') as file:
-                file.write(json.dumps(self.save_data, indent=4))
-        except FileNotFoundError:
-            mkdir('saves')
-            self.save()
-
     def exiting(self, *, save: bool = True) -> None:
         for i in range(3):
             clear()
@@ -412,9 +413,5 @@ class Game:
             sleep(0.25)
         clear()
         if save:
-            self.save()
+            save_json(self.save_path, self.save_data)
         exit()
-
-if __name__ == '__main__':
-    a = Game()
-    a.main_loop()
