@@ -4,7 +4,7 @@ import json
 from typing import Optional
 
 import keyboard
-from _colors import Colored as c
+from colors import Colored as c
 
 if __name__ == '__main__':
     raise RuntimeError
