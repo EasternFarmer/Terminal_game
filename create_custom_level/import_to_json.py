@@ -18,13 +18,13 @@ for i in range(len(level)):
             num_boxes += 1
         elif level[i][j] == 'X':
             boxes_goal_pos.append((i, j))
-        elif level[i][j] in ['^', '>', '<', 'v']:
+        elif level[i][j] in '^><v':
             player_pos = (i, j)
         elif level[i][j] == 'P':
             player_pos_goal = (i, j)
         elif level[i][j] == 'O':
             raise ValueError("You're not supposed to use this in a level!")
-        elif level[i][j] in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        elif level[i][j] in '123456789':
             if teleporter_pairs.get(level[i][j]) is None:
                 teleporter_pairs[level[i][j]] = []
             teleporter_pairs[level[i][j]].append((i, j))
